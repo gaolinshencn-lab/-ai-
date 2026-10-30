@@ -1,0 +1,45 @@
+2026-10-30 19:15:22+0000: Running with following config:
+allowResignation = true
+lagBuffer = 1.0
+logAllGTPCommunication = true
+logDir = gtp_logs
+logSearchInfo = true
+logSearchInfoForChosenMove = false
+logToStderr = false
+maxTimePondering = 60.0
+maxVisits = 500
+numSearchThreads = 6
+ponderingEnabled = false
+resignConsecTurns = 3
+resignThreshold = -0.90
+rules = tromp-taylor
+searchFactorAfterOnePass = 0.50
+searchFactorAfterTwoPass = 0.25
+searchFactorWhenWinning = 0.40
+searchFactorWhenWinningThreshold = 0.95
+
+2026-10-30 19:15:22+0000: Loading model and initializing benchmark...
+2026-10-30 19:15:22+0000: Testing with default positions for board size: 19
+2026-10-30 19:15:22+0000: nnRandSeed0 = 4720924868662617975
+2026-10-30 19:15:22+0000: After dedups: nnModelFile0 = models/kata1-b18c384nbt-s9996604416-d4316597426.bin.gz useFP16 auto
+2026-10-30 19:15:22+0000: Initializing neural net buffer to be size 19 * 19 exactly
+2026-10-30 19:15:24+0000: Eigen (CPU) backend thread 0: Model version 14
+2026-10-30 19:15:24+0000: Eigen (CPU) backend thread 0: Model name: kata1-b18c384nbt-s9996604416-d4316597426 (nbt convnet, 26326985 params)
+2026-10-30 19:15:24+0000: Eigen (CPU) backend thread 1: Model version 14
+2026-10-30 19:15:24+0000: Eigen (CPU) backend thread 1: Model name: kata1-b18c384nbt-s9996604416-d4316597426 (nbt convnet, 26326985 params)
+
+2026-10-30 19:15:28+0000: Loaded config default_gtp.cfg
+2026-10-30 19:15:28+0000: Loaded model models/kata1-b18c384nbt-s9996604416-d4316597426.bin.gz
+
+Testing using 40 visits.
+
+You are currently using the Eigen (CPU) version of KataGo. Due to having no GPU, it may be slow.
+
+Your GTP config is currently set to use numSearchThreads = 6
+Testing (board size 19x19): 
+numSearchThreads =  4: 0 / 4 positions, visits/s = -nan (0.0 secs)      numSearchThreads =  4: 1 / 4 positions, visits/s = 9.26 (4.6 secs)      numSearchThreads =  4: 2 / 4 positions, visits/s = 9.09 (9.5 secs)      numSearchThreads =  4: 3 / 4 positions, visits/s = 9.33 (13.8 secs)      numSearchThreads =  4: 4 / 4 positions, visits/s = 9.40 nnEvals/s = 9.51 nnBatches/s = 9.40 avgBatchSize = 1.01 (18.3 secs) (EloDiff baseline)
+
+2026-10-30 19:15:48+0000: GPU -1 finishing, processed 43 rows 42 batches
+2026-10-30 19:15:48+0000: GPU -1 finishing, processed 46 rows 46 batches
+2026-10-30 19:15:48+0000: GPU -1 finishing, processed 42 rows 42 batches
+2026-10-30 19:15:48+0000: GPU -1 finishing, processed 43 rows 42 batches

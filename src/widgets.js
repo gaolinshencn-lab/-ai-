@@ -482,23 +482,26 @@ WIDGETS.go = (el) => {
 // ---------- KataGo 方案向导 ----------
 WIDGETS.kataWizard = (el) => {
   const os = ["Windows", "Mac", "Linux"];
-  const gpus = { nv_new: "NVIDIA RTX 20/30/40/50 系列", nv_old: "NVIDIA GTX 10 系列或更老", amd: "AMD 显卡", intel: "Intel 核显（没有独显）", apple: "Apple M 系列芯片", none: "不知道 / 只有 CPU" };
+  const gpus = { nv_rtx: "NVIDIA RTX 20/30/40/50 系列", nv_gtx: "NVIDIA GTX 10/16 系列或更老", amd: "AMD 显卡", intel: "Intel 核显 / Intel 独显", apple: "Apple M 系列芯片", none: "没有显卡 / 不知道" };
   el.innerHTML = `<div class="grid2"><label>系统<select class="input" id="kw-os">${os.map((o) => `<option>${o}</option>`).join("")}</select></label><label>显卡<select class="input" id="kw-gpu">${Object.entries(gpus).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label></div><div class="decoded" id="kw-out" style="line-height:1.8"></div>`;
+  const TF = "kata1-tf3-b11c768-s11003M-d5973M-7gres", B18 = "kata1-b18c384nbt-s9996604416-d4316597426";
   const upd = () => {
     const o = $("#kw-os", el).value; let g = $("#kw-gpu", el).value;
-    if (o === "Mac" && g !== "apple") g = g === "none" ? "none" : "macintel";
     if (o !== "Mac" && g === "apple") { $("#kw-out", el).innerHTML = `<span class="no">Apple M 系列芯片只出现在 Mac 上，请把系统改成 Mac。</span>`; return; }
+    if (o === "Mac") {
+      const m = g === "apple";
+      $("#kw-out", el).innerHTML = `<div><b>安装：</b><code>brew install katago</code>（官方推荐，Metal 后端）。装完运行 <code>katago version</code>，确认 ≥ 1.17。</div><div><b>模型：</b>${m ? `<code>${TF}</code>；M1/M2 基础款嫌慢就用 <code>${B18}</code>` : `Intel Mac 较慢，用 <code>${B18}</code>`}</div><div><b>界面：</b>KaTrain（把引擎路径指向 brew 装的 katago）或 Sabaki</div><div><b>下一步：</b>第 3 课下载模型 → 第 4 课 benchmark</div>`;
+      return;
+    }
+    const sys = o === "Windows" ? "windows-x64" : "linux-x64";
     const plan = {
-      nv_new: ["OpenCL（先跑通），熟练后换 TensorRT", "文件名含 opencl", "最新 b28 大模型", "每秒几百到几千次计算，复盘非常流畅"],
-      nv_old: ["OpenCL", "文件名含 opencl", "最新 b18 模型", "每秒一两百次，复盘够用"],
-      amd: ["OpenCL", "文件名含 opencl", "独显用 b28 或 b18，入门卡用 b18", "取决于显卡档次"],
-      intel: ["OpenCL（不行再换 Eigen CPU 版）", "文件名含 opencl", "最新 b18 模型", "每秒几十次，复盘可以，限制每步时间"],
-      apple: ["KaTrain 自带 KataGo，或 brew install katago", "无需自己挑 zip", "M1/M2 基础款用 b18，Pro/Max 可用 b28", "M 系列芯片表现不错"],
-      macintel: ["KaTrain 自带 KataGo，或 Homebrew", "无需自己挑 zip", "最新 b18 模型", "较慢，复盘时限制每步时间"],
-      none: ["先按第 1 课查一下显卡；确实没有就用 Eigen（CPU）版", "文件名含 eigen（若有 avx2 版，较新的 CPU 选它）", "b18 模型", "较慢，适合偶尔复盘"],
+      nv_rtx: [`CUDA（v1.18.2）`, `<code>katago-v1.18.2-cuda12.1-cudnn9.8.0-${sys}.zip</code>，另需安装 CUDA 12.x 和 cuDNN 9.x。嫌麻烦就先用 v1.18.1 的 OpenCL 版跑通`, `<code>${TF}</code>（最强 transformer）`, "官方：RTX 20 系列在 v1.18.2 上跑 transformer 可快 50% 以上"],
+      nv_gtx: [`CUDA（v1.18.2）或 OpenCL（v1.18.1）`, `<code>katago-v1.18.2-cuda12.1-cudnn9.8.0-${sys}.zip</code>，或 v1.18.1 中含 <code>opencl</code> 的包`, `先试 <code>kata1-tf3-b10c512-s3203M-d5937M</code>，再和 <code>${B18}</code> 比速度`, "GTX 16 系列没有张量核心，官方建议在配置里试 <code>useFP16 = false</code>"],
+      amd: [`ROCm（v1.18.1，新）或 OpenCL`, `v1.18.1 中含 <code>rocm</code> 的包${o === "Windows" ? "（按显卡架构选 gfx103X/gfx110X/gfx1151/gfx120X，不确定就选 OpenCL）" : "（需先安装 ROCm）"}，或含 <code>opencl</code> 的包`, `<code>${TF}</code>；入门卡用 b18`, "两种后端都跑一次 benchmark，选快的"],
+      intel: [`ONNX（OpenVINO）或 OpenCL`, `v1.18.1 中含 <code>onnx-openvino</code> 的包（配置里设 <code>onnxProvider = openvino</code>），或含 <code>opencl</code> 的包`, `<code>${B18}</code>`, "核显较慢，适合复盘时每手多等几秒"],
+      none: [`Eigen AVX2（CPU）`, `<code>katago-v1.18.1-eigenavx2-${sys}.zip</code>（本路线实测用的就是它）；CPU 很老就选不带 avx2 的 eigen 包`, `<code>${B18}</code>（实测 CPU 上最快）`, "实测 4 核 CPU 每秒几次访问，复盘可用，对弈很慢"],
     }[g];
-    const sys = o === "Windows" ? "windows-x64" : o === "Linux" ? "linux-x64" : "";
-    $("#kw-out", el).innerHTML = `<div><b>后端：</b>${plan[0]}</div><div><b>下载哪个：</b>${plan[1]}${sys ? `，且含 <code>${sys}</code>` : ""}</div><div><b>模型：</b>${plan[2]}</div><div><b>大概速度：</b>${plan[3]}</div><div><b>界面：</b>${o === "Mac" ? "KaTrain 最省事" : "KaTrain（自带引擎，最省事）或 Sabaki / LizzieYzy"}</div>`;
+    $("#kw-out", el).innerHTML = `<div><b>后端：</b>${plan[0]}</div><div><b>下载：</b>${plan[1]}</div><div><b>模型：</b>${plan[2]}</div><div><b>提示：</b>${plan[3]}</div><div><b>界面：</b>KaTrain / LizzieYzy Next / Sabaki，记得把引擎指向你下载的 v1.18</div>`;
   };
   el.querySelectorAll("select").forEach((s) => (s.onchange = upd)); upd();
 };
