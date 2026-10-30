@@ -665,6 +665,7 @@ unzip titanic.zip</code></pre>
 <li>下载图形界面 <b>Sabaki</b> 或 <b>KaTrain</b>（都是免费开源）。</li>
 <li>在界面里添加引擎，指向 KataGo 程序，就能对弈和复盘分析。</li>
 </ol>
+<p>每一步的详细做法、配置和排错，见实战路线 <a href="#l-k1">本地部署 KataGo</a>（8 课）。</p>
 <h2>用 Claude Code 自己做一个</h2>
 <p>按难度递进的三个提示词：</p>
 <pre><code>1. 用 Python 写一个 9x9 围棋，支持提子、禁止自杀、打劫规则，命令行下棋。

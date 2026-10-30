@@ -478,3 +478,48 @@ WIDGETS.go = (el) => {
   $("#gnew", el).onclick = reset;
   reset();
 };
+
+// ---------- KataGo 方案向导 ----------
+WIDGETS.kataWizard = (el) => {
+  const os = ["Windows", "Mac", "Linux"];
+  const gpus = { nv_new: "NVIDIA RTX 20/30/40/50 系列", nv_old: "NVIDIA GTX 10 系列或更老", amd: "AMD 显卡", intel: "Intel 核显（没有独显）", apple: "Apple M 系列芯片", none: "不知道 / 只有 CPU" };
+  el.innerHTML = `<div class="grid2"><label>系统<select class="input" id="kw-os">${os.map((o) => `<option>${o}</option>`).join("")}</select></label><label>显卡<select class="input" id="kw-gpu">${Object.entries(gpus).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label></div><div class="decoded" id="kw-out" style="line-height:1.8"></div>`;
+  const upd = () => {
+    const o = $("#kw-os", el).value; let g = $("#kw-gpu", el).value;
+    if (o === "Mac" && g !== "apple") g = g === "none" ? "none" : "macintel";
+    if (o !== "Mac" && g === "apple") { $("#kw-out", el).innerHTML = `<span class="no">Apple M 系列芯片只出现在 Mac 上，请把系统改成 Mac。</span>`; return; }
+    const plan = {
+      nv_new: ["OpenCL（先跑通），熟练后换 TensorRT", "文件名含 opencl", "最新 b28 大模型", "每秒几百到几千次计算，复盘非常流畅"],
+      nv_old: ["OpenCL", "文件名含 opencl", "最新 b18 模型", "每秒一两百次，复盘够用"],
+      amd: ["OpenCL", "文件名含 opencl", "独显用 b28 或 b18，入门卡用 b18", "取决于显卡档次"],
+      intel: ["OpenCL（不行再换 Eigen CPU 版）", "文件名含 opencl", "最新 b18 模型", "每秒几十次，复盘可以，限制每步时间"],
+      apple: ["KaTrain 自带 KataGo，或 brew install katago", "无需自己挑 zip", "M1/M2 基础款用 b18，Pro/Max 可用 b28", "M 系列芯片表现不错"],
+      macintel: ["KaTrain 自带 KataGo，或 Homebrew", "无需自己挑 zip", "最新 b18 模型", "较慢，复盘时限制每步时间"],
+      none: ["先按第 1 课查一下显卡；确实没有就用 Eigen（CPU）版", "文件名含 eigen（若有 avx2 版，较新的 CPU 选它）", "b18 模型", "较慢，适合偶尔复盘"],
+    }[g];
+    const sys = o === "Windows" ? "windows-x64" : o === "Linux" ? "linux-x64" : "";
+    $("#kw-out", el).innerHTML = `<div><b>后端：</b>${plan[0]}</div><div><b>下载哪个：</b>${plan[1]}${sys ? `，且含 <code>${sys}</code>` : ""}</div><div><b>模型：</b>${plan[2]}</div><div><b>大概速度：</b>${plan[3]}</div><div><b>界面：</b>${o === "Mac" ? "KaTrain 最省事" : "KaTrain（自带引擎，最省事）或 Sabaki / LizzieYzy"}</div>`;
+  };
+  el.querySelectorAll("select").forEach((s) => (s.onchange = upd)); upd();
+};
+
+// ---------- 逐行解释（通用）----------
+WIDGETS.annot = (el, l) => {
+  el.innerHTML = `<div class="transcript codepick" id="an"></div><div class="explain-box" id="an-ex"><span class="muted">点击上面任意一行。</span></div>`;
+  l.annot.forEach(([cls, t, ex]) => {
+    const d = h(`<div class="tl ${cls}" tabindex="0">${esc(t)}</div>`);
+    const act = () => { el.querySelectorAll(".tl").forEach((x) => x.classList.remove("on")); d.classList.add("on"); $("#an-ex", el).textContent = ex; };
+    d.onclick = act; d.onkeydown = (e) => { if (e.key === "Enter") act(); };
+    $("#an", el).appendChild(d);
+  });
+};
+
+// ---------- 报错 → 解决 ----------
+WIDGETS.faq = (el, l) => {
+  el.innerHTML = `<div class="results" id="fq"></div><div class="explain-box" id="fq-ex"><span class="muted">点击你遇到的报错。</span></div>`;
+  l.faq.forEach(([q, a]) => {
+    const b = h(`<button class="result"><span class="u" style="color:var(--bad)">${esc(q)}</span></button>`);
+    b.onclick = () => { el.querySelectorAll(".result").forEach((x) => x.classList.remove("right")); b.classList.add("right"); $("#fq-ex", el).textContent = a; };
+    $("#fq", el).appendChild(b);
+  });
+};

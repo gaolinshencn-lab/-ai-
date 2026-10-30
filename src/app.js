@@ -34,17 +34,17 @@ function renderHome() {
   const next = LESSONS.find((l) => !doneSet.has(l.id)) || LESSONS[0];
   return `
 <section class="hero">
-  <div class="tag">从零到精通 · 23 课 · 每课都能动手</div>
+  <div class="tag">从零到精通 · ${LESSONS.length} 课 · 每课都能动手</div>
   <h1 style="margin:6px 0 10px">会开机就能开始</h1>
-  <p>为一个刚满 24 岁、只会开关机和打开软件的大学生设计。五条路线：电脑基础、网络名词、短视频、用 AI 学习、AI 编程。每课有讲解、动手练习、小测验和 YouTube 视频。学完一课，棋盘上落一颗子。</p>
+  <p>为一个刚满 24 岁、只会开关机和打开软件的大学生设计。六条路线：电脑基础、网络名词、短视频、用 AI 学习、AI 编程，以及实战：在自己电脑上部署 KataGo。每课有讲解、动手练习、小测验和 YouTube 视频。学完一课，棋盘上落一颗子。</p>
   <div class="row" style="margin-top:14px"><a class="btn primary" href="#l-${next.id}" style="text-decoration:none">${doneSet.size ? "继续学习" : "从第一课开始"}：${next.title}</a><a class="btn" href="#glossary" style="text-decoration:none">名词速查</a></div>
 </section>
 <div class="ladder">
   <div class="rung"><span class="rank">级位 · 18k → 1k</span><b>基础</b><span class="muted small">知道是什么，能照着做。下载安装、IP 和端口、拍第一条视频、建 GitHub 仓库。</span></div>
   <div class="rung"><span class="rank">初段 · 1d → 3d</span><b>行家</b><span class="muted small">知道为什么，出问题能自己查。读懂 Claude Code、检查代码、剪辑和写钩子。</span></div>
-  <div class="rung"><span class="rank">高段 · 4d+</span><b>精通</b><span class="muted small">能独立做出东西。部署服务器、本地跑 Kaggle、物理模型、自己的围棋 AI、1 万粉路线。</span></div>
+  <div class="rung"><span class="rank">高段 · 4d+</span><b>精通</b><span class="muted small">能独立做出东西。部署服务器、本地跑 Kaggle、本地部署 KataGo、物理模型、自己的围棋 AI、1 万粉路线。</span></div>
 </div>
-<h2 style="font-size:22px;margin:28px 0 12px">五条路线</h2>
+<h2 style="font-size:22px;margin:28px 0 12px">${TRACKS.length} 条路线</h2>
 <div class="track-cards">${TRACKS.map((t) => {
     const ls = LESSONS.filter((l) => l.track === t.id);
     return `<a class="tcard" href="#l-${ls[0].id}"><h3>${t.name}</h3><p>${t.desc}</p><div class="stones">${ls.map((l) => stoneEl(l.id)).join("")}</div></a>`;
@@ -57,7 +57,7 @@ function renderHome() {
   <li><b>第 4 周</b><span>GitHub、本地与云端、读懂 Claude Code。建你的第一个仓库。</span></li>
   <li><b>第 5 周</b><span>检查代码 + 物理模型。用 AI 写出抛体模拟并验证。</span></li>
   <li><b>第 6 周</b><span>本地跑 Kaggle Titanic，提交一次成绩。</span></li>
-  <li><b>第 7 周</b><span>围棋 AI：装 KataGo 复盘，再用 Claude Code 写自己的 9 路 AI。</span></li>
+  <li><b>第 7 周</b><span>实战路线：在自己电脑上部署最新 KataGo 模型，接上 KaTrain 复盘；再用 Python 调用它分析自己的棋谱。</span></li>
   <li><b>第 8 周</b><span>VPN 原理、云服务器部署，把你的作品挂到网上。整理成一个系列视频。</span></li>
 </ol></div>`;
 }
@@ -84,6 +84,7 @@ function renderLesson(l) {
 <p class="lead">${l.lead}</p>
 <article class="prose">${l.body}</article>
 ${l.widget ? `<section class="block"><div class="block-h"><span class="tag">动手练</span><h2>${widgetName(l.widget)}</h2></div><div id="widget"></div></section>` : ""}
+${l.extra ? `<article class="prose">${l.extra}</article>` : ""}
 <section class="block"><div class="block-h"><span class="tag">视频讲解</span><h2>在 YouTube 上看</h2></div>
   <div class="vids">${l.videos.map((v) => `<a class="vid" href="https://www.youtube.com/results?search_query=${encodeURIComponent(v.q)}" target="_blank" rel="noopener"><span class="play"></span><span>${esc(v.t)}<small>搜索：${esc(v.q)}</small></span></a>`).join("")}</div>
   <p class="small muted" style="margin:12px 0 6px">找到一个讲得好的视频？把 YouTube 链接贴在这里，以后在这一课直接看。</p>
@@ -99,11 +100,11 @@ ${l.widget ? `<section class="block"><div class="block-h"><span class="tag">动�
 }
 
 function widgetName(w) {
-  return { pathTree: "点文件夹，看路径怎么变", fakeSearch: "哪个才是官网？", keys: "快捷键练习区", terminal: "模拟终端", dns: "看一次网页访问的全过程", decoder: "术语翻译器", proxy: "直连 vs 代理", niche: "定位生成器", hook: "开头检查器", growth: "1 万粉计算器", prompt: "提示词生成器", projectile: "抛体运动模拟", git: "Git 四个区域", transcript: "点击每一行看解释", bug: "找出 bug", go: "和规则型 AI 下一盘 9 路棋" }[w] || "练习";
+  return { pathTree: "点文件夹，看路径怎么变", fakeSearch: "哪个才是官网？", keys: "快捷键练习区", terminal: "模拟终端", dns: "看一次网页访问的全过程", decoder: "术语翻译器", proxy: "直连 vs 代理", niche: "定位生成器", hook: "开头检查器", growth: "1 万粉计算器", prompt: "提示词生成器", projectile: "抛体运动模拟", git: "Git 四个区域", transcript: "点击每一行看解释", bug: "找出 bug", kataWizard: "你的电脑该装哪个版本", annot: "点击每一行看解释", faq: "报错 → 解决方法", go: "和规则型 AI 下一盘 9 路棋" }[w] || "练习";
 }
 
 function bindLesson(l) {
-  if (l.widget) WIDGETS[l.widget]($("#widget"));
+  if (l.widget) WIDGETS[l.widget]($("#widget"), l);
   // 测验
   const qz = $("#quiz");
   l.quiz.forEach((q, qi) => {
